@@ -9,6 +9,12 @@ RUN apt-get update && apt-get install -y \
 	bowtie2 \
 	tophat \
 	git \
+	build-essential\
+	libncurses5-dev\
+	zlib1g-dev\
+	libbz2-dev\
+	liblzma-dev\
+	bzip2\
 	unzip
 
 ENV WORKPATH /usr/local/bin
@@ -32,11 +38,27 @@ RUN wget -nv --output-document cufflinks-2.2.1.Linux_x86_64 http://cole-trapnell
 	tar -vxzf cufflinks-2.2.1.Linux_x86_64
 ENV PATH $WORKPATH/cufflinks-2.2.1.Linux_x86_64:$PATH
 
+## Samtools 1.6##
+ENV SAMVERSION 1.6
+RUN wget -nv https://github.com/samtools/samtools/releases/download/1.6/samtools-${SAMVERSION}.tar.bz2
+RUN bzip2 -d  samtools-${SAMVERSION}.tar.bz2 && \
+	tar -xvf samtools-${SAMVERSION}.tar && \
+	cd samtools-${SAMVERSION} && \
+	apt-get install -y libcurl4-openssl-dev && \
+	./configure && \
+	make install
+
 ##cleanup the image
 RUN rm -rf sratoolkit.tar.gz && \
 	rm -rf hisat2-2.1.0-Linux_x86_64.zip \
 	rm -rf cufflinks-2.2.1.Linux_x86_64.tar.gz \
+	rm -rf samtools-${SAMVERSION}.tar.bz2 \
 	apt-get clean
+
+
+
+#ENV SHELL /bin/bash
+
 
 
 # create an app user
